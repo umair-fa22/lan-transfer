@@ -36,18 +36,18 @@ Then open the URL shown in the terminal on any device connected to the same Wi-F
 lan-transfer [download-path] [port]
 ```
 
-| Argument | Description | Default |
-|---|---|---|
+| Argument        | Description                        | Default              |
+| --------------- | ---------------------------------- | -------------------- |
 | `download-path` | Directory to serve for downloading | OS-based (see below) |
-| `port` | Port to run the server on | `3000` |
+| `port`          | Port to run the server on          | `3000`               |
 
 **Default download paths by OS:**
 
-| OS | Default |
-|---|---|
+| OS               | Default                        |
+| ---------------- | ------------------------------ |
 | Android (Termux) | `/storage/emulated/0/Download` |
-| Windows | `C:\Users\username\Downloads` |
-| Linux / macOS | `~/Downloads` |
+| Windows          | `C:\Users\username\Downloads`  |
+| Linux / macOS    | `~/Downloads`                  |
 
 **Examples:**
 
@@ -72,12 +72,14 @@ lan-transfer ~/Desktop
 **Home page** — choose Upload or Download
 
 **Upload**
+
 - Drag & drop or tap to select files
 - Per-file progress bars with live percentage
 - Preserves original file modified time
 - Files saved in `uploads/` folder where command was run
 
 **Download**
+
 - Browse folders and subfolders
 - Navigate back with ⬆ Up button or `Backspace` / `Alt+Left`
 - Search/filter files
@@ -85,6 +87,7 @@ lan-transfer ~/Desktop
 - Change download directory at runtime without restart
 
 **Path changer (Download page)**
+
 - Quick buttons for common Android paths
 - Custom path input
 - Validates path exists before applying

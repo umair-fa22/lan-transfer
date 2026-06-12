@@ -54,7 +54,7 @@ let downloadDir = process.argv[2]
     ? path.resolve(process.argv[2])
     : getDefaultDownloadDir();
 
-[uploadDir, downloadDir].forEach(dir => {
+[uploadDir, downloadDir].forEach((dir) => {
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 });
 
@@ -62,10 +62,9 @@ let downloadDir = process.argv[2]
 function buildStorage() {
     return multer.diskStorage({
         destination: (req, file, cb) => cb(null, uploadDir),
-        filename: (req, file, cb) => cb(null, file.originalname)
+        filename: (req, file, cb) => cb(null, file.originalname),
     });
 }
-
 
 let upload = multer({ storage: buildStorage() });
 
@@ -73,9 +72,15 @@ let upload = multer({ storage: buildStorage() });
 app.use(express.static("public"));
 
 // ── Page routes ──────────────────────────────────────────────────
-app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
-app.get("/upload-page", (req, res) => res.sendFile(path.join(__dirname, "public", "upload.html")));
-app.get("/download-page", (req, res) => res.sendFile(path.join(__dirname, "public", "download.html")));
+app.get("/", (req, res) =>
+    res.sendFile(path.join(__dirname, "public", "index.html")),
+);
+app.get("/upload-page", (req, res) =>
+    res.sendFile(path.join(__dirname, "public", "upload.html")),
+);
+app.get("/download-page", (req, res) =>
+    res.sendFile(path.join(__dirname, "public", "download.html")),
+);
 
 // ── Config API ───────────────────────────────────────────────────
 // GET  /config          → return current paths
@@ -112,8 +117,8 @@ app.get("/files", (req, res) => {
     try {
         const entries = fs.readdirSync(downloadDir);
         const files = entries
-            .filter(name => fs.statSync(path.join(downloadDir, name)).isFile())
-            .map(name => {
+            .filter((name) => fs.statSync(path.join(downloadDir, name)).isFile())
+            .map((name) => {
                 const stats = fs.statSync(path.join(downloadDir, name));
                 return { name, size: stats.size, mtime: stats.mtime.toISOString() };
             })
@@ -141,19 +146,22 @@ app.get("/browse", (req, res) => {
     }
 
     try {
-        const entries = fs.readdirSync(target).map(name => {
-            const full = path.join(target, name);
-            const stats = fs.statSync(full);
-            return {
-                name,
-                isDir: stats.isDirectory(),
-                size: stats.isFile() ? stats.size : null,
-                mtime: stats.mtime.toISOString()
-            };
-        }).sort((a, b) => {
-            if (a.isDir !== b.isDir) return a.isDir ? -1 : 1;
-            return a.name.localeCompare(b.name);
-        });
+        const entries = fs
+            .readdirSync(target)
+            .map((name) => {
+                const full = path.join(target, name);
+                const stats = fs.statSync(full);
+                return {
+                    name,
+                    isDir: stats.isDirectory(),
+                    size: stats.isFile() ? stats.size : null,
+                    mtime: stats.mtime.toISOString(),
+                };
+            })
+            .sort((a, b) => {
+                if (a.isDir !== b.isDir) return a.isDir ? -1 : 1;
+                return a.name.localeCompare(b.name);
+            });
 
         res.json({ path: target, entries });
     } catch (err) {
@@ -183,7 +191,7 @@ app.get("/download/:filename", (req, res) => {
 
 // ── API: upload files ─────────────────────────────────────────────
 app.post("/upload", (req, res, next) => {
-    upload.array("files")(req, res, async err => {
+    upload.array("files")(req, res, async (err) => {
         if (err) return res.status(500).send("Upload error: " + err.message);
 
         for (const file of req.files) {
@@ -207,8 +215,6 @@ app.post("/upload", (req, res, next) => {
     });
 });
 
-
-
 app.get("/qr", async (req, res) => {
     const ip = getLocalIP();
     const url = `http://${ip}:${PORT}`;
@@ -221,15 +227,10 @@ app.get("/gethome", (req, res) => {
     res.json({ home: os.homedir() });
 });
 
-
-
-
 // ── Start ─────────────────────────────────────────────────────────
 app.listen(PORT, "0.0.0.0", () => {
-
-    
     const ip = getLocalIP();
-    
+
     qrcode.generate(`http://${ip}:${PORT}`, { small: true });
 
     console.log(`\n🚀 LAN Transfer running!`);
