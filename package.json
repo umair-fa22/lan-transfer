@@ -12,15 +12,15 @@
     "qrcode": "^1.5.4"
   },
   "keywords": ["lan", "file-transfer", "termux", "android", "local-network"],
-  "author": "umdv",
+  "author": "umair-fa22",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/umdv/lan-transfer.git"
+    "url": "https://github.com/umair-fa22/lan-transfer.git"
   },
-  "homepage": "https://github.com/umdv/lan-transfer#readme",
+  "homepage": "https://github.com/umair-fa22/lan-transfer#readme",
   "bugs": {
-    "url": "https://github.com/umdv/lan-transfer/issues"
+    "url": "https://github.com/umair-fa22/lan-transfer/issues"
   },
   "publishConfig": {
     "access": "public"
