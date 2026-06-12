@@ -1,0 +1,80 @@
+body {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+.container-box {
+  max-width: 800px;
+  margin: auto;
+  padding: 16px;
+}
+.filename {
+  word-break: break-all;
+  font-size: 0.9rem;
+}
+.ext-badge {
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: #e9ecef;
+  color: #495057;
+  font-family: monospace;
+  text-transform: uppercase;
+}
+.folder-item {
+  cursor: pointer;
+}
+.folder-item:hover {
+  background: #f0f4ff;
+}
+.path-bar {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-family: monospace;
+  color: #495057;
+  word-break: break-all;
+}
+.settings-panel {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 12px;
+  padding: 16px;
+}
+.breadcrumb-custom {
+  display: flex;
+  flex-wrap: wrap;
+  /* font-weight: bold; */
+  gap: 4px;
+  align-items: center;
+  font-size: 0.82rem;
+}
+
+.breadcrumb-custom span {
+  cursor: pointer;
+  color: #0d6efd;
+  
+}
+.breadcrumb-custom span:first-child {
+    color: black;
+    font-weight: bold;
+}
+
+
+.breadcrumb-custom span:last-child {
+  color: #495057;
+  text-decoration: none;
+  cursor: default;
+}
+.breadcrumb-custom .sep {
+  color: #adb5bd;
+}
+@media (max-width: 576px) {
+  h2 {
+    font-size: 1.4rem;
+  }
+  .btn-sm {
+    font-size: 0.75rem;
+  }
+}
