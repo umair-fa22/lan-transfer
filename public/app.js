@@ -136,7 +136,7 @@ async function loadFiles() {
     const cfg = await fetch("/config").then((r) => r.json());
     downloadDir = cfg.downloadDir;
     document.getElementById("currentPathDisplay").textContent = downloadDir;
-  } catch (_) {}
+  } catch (_) { }
 
   renderBreadcrumb();
 
@@ -176,6 +176,7 @@ function filterEntries() {
 function renderEntries(entries) {
   const list = document.getElementById("fileList");
   const empty = document.getElementById("emptyState");
+
   list.innerHTML = "";
 
   if (entries.length === 0) {
@@ -290,3 +291,147 @@ async function applyPath() {
 }
 
 loadFiles();
+
+fetch("/qr")
+  .then((r) => r.json())
+  .then((data) => {
+    document.getElementById("qrImg").src = data.qr;
+  });
+
+const input = document.getElementById("files");
+const dropzone = document.getElementById("dropzone");
+let fileItems = [];
+
+dropzone.addEventListener("click", () => input.click());
+dropzone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  dropzone.classList.add("dragover");
+});
+dropzone.addEventListener("dragleave", () =>
+  dropzone.classList.remove("dragover"),
+);
+dropzone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropzone.classList.remove("dragover");
+  input.files = e.dataTransfer.files;
+  renderFiles();
+});
+input.addEventListener("change", renderFiles);
+
+function renderFiles() {
+  const list = document.getElementById("fileList");
+  const summary = document.getElementById("summary");
+  list.innerHTML = "";
+  fileItems = [];
+  let totalSize = 0;
+
+  [...input.files].forEach((file, i) => {
+    totalSize += file.size;
+    const li = document.createElement("li");
+    li.className = "list-group-item";
+    li.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="filename">📄 ${file.name}</div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary">${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                    <span class="file-status text-muted" id="status-${i}">Pending</span>
+                </div>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" id="bar-${i}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        `;
+    list.appendChild(li);
+    fileItems.push({ file, bar: null, statusEl: null });
+  });
+
+  [...input.files].forEach((_, i) => {
+    fileItems[i].bar = document.getElementById(`bar-${i}`);
+    fileItems[i].statusEl = document.getElementById(`status-${i}`);
+  });
+
+  summary.innerText = `${input.files.length} file(s) • ${(totalSize / 1024 / 1024).toFixed(2)} MB`;
+}
+
+function uploadSingleFile(file, bar, statusEl) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append("files", file);
+    formData.append(
+      `mtime_${file.name}`,
+      new Date(file.lastModified).toISOString(),
+    );
+
+    xhr.upload.addEventListener("progress", (e) => {
+      if (e.lengthComputable) {
+        const pct = Math.round((e.loaded / e.total) * 100);
+        bar.style.width = pct + "%";
+        bar.setAttribute("aria-valuenow", pct);
+        statusEl.textContent = pct + "%";
+        statusEl.className = "file-status text-primary";
+      }
+    });
+
+    xhr.addEventListener("load", () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        bar.style.width = "100%";
+        bar.classList.add("done");
+        statusEl.textContent = "Done ✓";
+        statusEl.className = "file-status text-success";
+        resolve();
+      } else {
+        bar.classList.add("error");
+        statusEl.textContent = "Failed";
+        statusEl.className = "file-status text-danger";
+        reject(new Error(`HTTP ${xhr.status}`));
+      }
+    });
+
+    xhr.addEventListener("error", () => {
+      bar.classList.add("error");
+      statusEl.textContent = "Error";
+      statusEl.className = "file-status text-danger";
+      reject(new Error("Network error"));
+    });
+
+    xhr.open("POST", "/upload");
+    xhr.send(formData);
+  });
+}
+
+async function uploadFiles() {
+  if (input.files.length === 0) {
+    alert("Select files first");
+    return;
+  }
+
+  const btn = document.getElementById("uploadBtn");
+  btn.disabled = true;
+  btn.textContent = "Uploading...";
+
+  const globalStatus = document.getElementById("status");
+  globalStatus.innerHTML = `<div class="alert alert-info">Uploading ${input.files.length} file(s)...</div>`;
+
+  let done = 0,
+    failed = 0;
+
+  for (let i = 0; i < fileItems.length; i++) {
+    const { file, bar, statusEl } = fileItems[i];
+    try {
+      await uploadSingleFile(file, bar, statusEl);
+      done++;
+    } catch (err) {
+      failed++;
+    }
+  }
+
+  btn.disabled = false;
+  btn.textContent = "Upload Files";
+
+  if (failed === 0) {
+    globalStatus.innerHTML = `<div class="alert alert-success">✅ All ${done} file(s) uploaded successfully!</div>`;
+  } else {
+    globalStatus.innerHTML = `<div class="alert alert-warning">⚠️ ${done} uploaded, ${failed} failed.</div>`;
+  }
+}

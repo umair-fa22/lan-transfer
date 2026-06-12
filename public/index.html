@@ -1,94 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>LAN Transfer</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            min-height: 100vh;
-            background: #f8f9fa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .home-card {
-            max-width: 480px;
-            width: 100%;
-            margin: 16px;
-        }
-
-        .option-btn {
-            border: 2px solid #dee2e6;
-            border-radius: 16px;
-            padding: 32px 24px;
-            background: white;
-            cursor: pointer;
-            transition: all .2s;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .option-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
-            color: inherit;
-        }
-
-        .option-btn.upload:hover {
-            border-color: #0d6efd;
-        }
-
-        .option-btn.download:hover {
-            border-color: #198754;
-        }
-
-        .icon-circle {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            margin: 0 auto 16px;
-        }
-
-        .upload .icon-circle {
-            background: #e8f0fe;
-        }
-
-        .download .icon-circle {
-            background: #e8f5e9;
-        }
-
-        @media (max-width: 480px) {
-            .option-btn {
-                padding: 24px 16px;
-            }
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+    <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
-
     <div class="home-card">
-
         <div class="text-center mb-4">
             <h2 class="fw-semibold">📡 LAN Transfer</h2>
             <p class="text-muted mb-0">What do you want to do?</p>
         </div>
 
         <div class="d-flex flex-column gap-3">
-
             <a href="/upload-page" class="option-btn upload">
                 <div class="icon-circle">📤</div>
                 <h5 class="text-center mb-1">Upload Files</h5>
-                <p class="text-muted text-center mb-0" style="font-size:.9rem;">
+                <p class="text-muted text-center mb-0" style="font-size: 0.9rem">
                     Send files from this device to the server
                 </p>
             </a>
@@ -96,37 +30,21 @@
             <a href="/download-page" class="option-btn download">
                 <div class="icon-circle">📥</div>
                 <h5 class="text-center mb-1">Download Files</h5>
-                <p class="text-muted text-center mb-0" style="font-size:.9rem;">
+                <p class="text-muted text-center mb-0" style="font-size: 0.9rem">
                     Browse and download files from the server
                 </p>
             </a>
-
         </div>
 
         <div class="text-center my-4">
-            <img id="qrImg" src="" alt="QR Code" style="width:150px; height:150px;">
+            <img id="qrImg" src="" alt="QR Code" style="width: 150px; height: 150px" />
             <p class="text-muted">Scan the QR code to connect</p>
-            
         </div>
 
-        <p class="text-center text-muted mt-4 mb-0" style="font-size:.8rem;">
+        <p class="text-center text-muted mt-4 mb-0" style="font-size: 0.8rem">
             Connected on local network
         </p>
-
-
-
     </div>
-
-
-
 </body>
-
-<script>
-    fetch("/qr")
-        .then(r => r.json())
-        .then(data => {
-            document.getElementById("qrImg").src = data.qr;
-        });
-</script>
 
 </html>

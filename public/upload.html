@@ -1,199 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Upload Files</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-body { min-height:100vh; background:#f8f9fa; }
-.container-box { max-width:800px; margin:auto; padding:16px; }
-.dropzone { border:2px dashed #0d6efd; border-radius:16px; padding:40px 20px; text-align:center; background:white; cursor:pointer; transition:.2s; }
-.dropzone:hover { transform:translateY(-2px); }
-.dropzone.dragover { border-color:#198754; background:#f0fff4; }
-.file-list { max-height:400px; overflow-y:auto; }
-.filename { word-break:break-word; max-width:60%; font-size:.9rem; }
-.sticky-upload { position:sticky; bottom:10px; z-index:100; }
-.progress { height:6px; border-radius:4px; background:#e9ecef; overflow:hidden; margin-top:6px; }
-.progress-bar { height:100%; border-radius:4px; background:#0d6efd; width:0%; transition:width .2s ease; }
-.progress-bar.done { background:#198754; }
-.progress-bar.error { background:#dc3545; }
-.file-status { font-size:.75rem; margin-top:3px; }
-@media (max-width:576px) {
-    .dropzone { padding:30px 15px; }
-    h2 { font-size:1.5rem; }
-    .filename { max-width:55%; }
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upload Files</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+  <script src="app.js" defer></script>
 </head>
+
 <body>
-
-<div class="container-box">
-
+  <div class="container-box">
     <div class="mb-3">
-        <a href="/" class="btn btn-sm btn-outline-secondary">← Back</a>
+      <a href="/" class="btn btn-sm btn-outline-secondary">← Back</a>
     </div>
 
     <div class="card shadow-sm border-0">
-        <div class="card-body">
+      <div class="card-body">
+        <h2 class="text-center mb-3">📤 Upload Files</h2>
 
-            <h2 class="text-center mb-3">📤 Upload Files</h2>
-
-            <div id="dropzone" class="dropzone">
-                <div class="fs-1">📁</div>
-                <h5 class="mt-2">Drop files here</h5>
-                <div class="text-muted">or tap to select files</div>
-                <input type="file" id="files" multiple hidden>
-            </div>
-
-            <div class="mt-3">
-                <span id="summary" class="badge bg-secondary">No files selected</span>
-            </div>
-
-            <ul id="fileList" class="list-group file-list mt-3"></ul>
-
-            <div id="status" class="mt-3"></div>
-
-            <div class="sticky-upload mt-3">
-                <button id="uploadBtn" class="btn btn-primary btn-lg w-100" onclick="uploadFiles()">
-                    Upload Files
-                </button>
-            </div>
-
+        <div id="dropzone" class="dropzone">
+          <div class="fs-1">📁</div>
+          <h5 class="mt-2">Drop files here</h5>
+          <div class="text-muted">or tap to select files</div>
+          <input type="file" id="files" multiple hidden />
         </div>
+
+        <div class="mt-3">
+          <span id="summary" class="badge bg-secondary">No files selected</span>
+        </div>
+
+        <ul id="fileList" class="list-group file-list mt-3"></ul>
+
+        <div id="status" class="mt-3"></div>
+
+        <div class="sticky-upload mt-3">
+          <button id="uploadBtn" class="btn btn-primary btn-lg w-100" onclick="uploadFiles()">
+            Upload Files
+          </button>
+        </div>
+      </div>
     </div>
-</div>
-
-<script>
-const input = document.getElementById("files");
-const dropzone = document.getElementById("dropzone");
-let fileItems = [];
-
-dropzone.addEventListener("click", () => input.click());
-dropzone.addEventListener("dragover", e => { e.preventDefault(); dropzone.classList.add("dragover"); });
-dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
-dropzone.addEventListener("drop", e => {
-    e.preventDefault();
-    dropzone.classList.remove("dragover");
-    input.files = e.dataTransfer.files;
-    renderFiles();
-});
-input.addEventListener("change", renderFiles);
-
-function renderFiles() {
-    const list = document.getElementById("fileList");
-    const summary = document.getElementById("summary");
-    list.innerHTML = "";
-    fileItems = [];
-    let totalSize = 0;
-
-    [...input.files].forEach((file, i) => {
-        totalSize += file.size;
-        const li = document.createElement("li");
-        li.className = "list-group-item";
-        li.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="filename">📄 ${file.name}</div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary">${(file.size/1024/1024).toFixed(2)} MB</span>
-                    <span class="file-status text-muted" id="status-${i}">Pending</span>
-                </div>
-            </div>
-            <div class="progress">
-                <div class="progress-bar" id="bar-${i}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-            </div>
-        `;
-        list.appendChild(li);
-        fileItems.push({ file, bar: null, statusEl: null });
-    });
-
-    [...input.files].forEach((_, i) => {
-        fileItems[i].bar = document.getElementById(`bar-${i}`);
-        fileItems[i].statusEl = document.getElementById(`status-${i}`);
-    });
-
-    summary.innerText = `${input.files.length} file(s) • ${(totalSize/1024/1024).toFixed(2)} MB`;
-}
-
-function uploadSingleFile(file, bar, statusEl) {
-    return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        const formData = new FormData();
-        formData.append("files", file);
-        formData.append(`mtime_${file.name}`, new Date(file.lastModified).toISOString());
-
-        xhr.upload.addEventListener("progress", e => {
-            if (e.lengthComputable) {
-                const pct = Math.round((e.loaded / e.total) * 100);
-                bar.style.width = pct + "%";
-                bar.setAttribute("aria-valuenow", pct);
-                statusEl.textContent = pct + "%";
-                statusEl.className = "file-status text-primary";
-            }
-        });
-
-        xhr.addEventListener("load", () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                bar.style.width = "100%";
-                bar.classList.add("done");
-                statusEl.textContent = "Done ✓";
-                statusEl.className = "file-status text-success";
-                resolve();
-            } else {
-                bar.classList.add("error");
-                statusEl.textContent = "Failed";
-                statusEl.className = "file-status text-danger";
-                reject(new Error(`HTTP ${xhr.status}`));
-            }
-        });
-
-        xhr.addEventListener("error", () => {
-            bar.classList.add("error");
-            statusEl.textContent = "Error";
-            statusEl.className = "file-status text-danger";
-            reject(new Error("Network error"));
-        });
-
-        xhr.open("POST", "/upload");
-        xhr.send(formData);
-    });
-}
-
-async function uploadFiles() {
-    if (input.files.length === 0) {
-        alert("Select files first");
-        return;
-    }
-
-    const btn = document.getElementById("uploadBtn");
-    btn.disabled = true;
-    btn.textContent = "Uploading...";
-
-    const globalStatus = document.getElementById("status");
-    globalStatus.innerHTML = `<div class="alert alert-info">Uploading ${input.files.length} file(s)...</div>`;
-
-    let done = 0, failed = 0;
-
-    for (let i = 0; i < fileItems.length; i++) {
-        const { file, bar, statusEl } = fileItems[i];
-        try {
-            await uploadSingleFile(file, bar, statusEl);
-            done++;
-        } catch (err) {
-            failed++;
-        }
-    }
-
-    btn.disabled = false;
-    btn.textContent = "Upload Files";
-
-    if (failed === 0) {
-        globalStatus.innerHTML = `<div class="alert alert-success">✅ All ${done} file(s) uploaded successfully!</div>`;
-    } else {
-        globalStatus.innerHTML = `<div class="alert alert-warning">⚠️ ${done} uploaded, ${failed} failed.</div>`;
-    }
-}
-</script>
-
+  </div>
 </body>
+
 </html>
