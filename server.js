@@ -40,12 +40,15 @@ function getDefaultDownloadDir() {
 const app = express();
 const PORT = 3000;
 
+const QRCode = require("qrcode");
+const qrcode = require("qrcode-terminal");
+const uploadDir = path.join(process.cwd(), "uploads");
+
 app.use(express.json());
 
 // ── Runtime state ────────────────────────────────────────────────
 // uploadDir  → always "uploads/" inside CWD (where command was run)
 // downloadDir → CLI arg, or same as uploadDir by default
-const uploadDir = path.join(process.cwd(), "uploads");
 
 let downloadDir = process.argv[2]
     ? path.resolve(process.argv[2])
@@ -62,6 +65,8 @@ function buildStorage() {
         filename: (req, file, cb) => cb(null, file.originalname)
     });
 }
+
+
 let upload = multer({ storage: buildStorage() });
 
 // ── Static files ─────────────────────────────────────────────────
@@ -202,7 +207,7 @@ app.post("/upload", (req, res, next) => {
     });
 });
 
-const QRCode = require("qrcode");
+
 
 app.get("/qr", async (req, res) => {
     const ip = getLocalIP();
@@ -217,9 +222,16 @@ app.get("/gethome", (req, res) => {
 });
 
 
+
+
 // ── Start ─────────────────────────────────────────────────────────
 app.listen(PORT, "0.0.0.0", () => {
+
+    
     const ip = getLocalIP();
+    
+    qrcode.generate(`http://${ip}:${PORT}`, { small: true });
+
     console.log(`\n🚀 LAN Transfer running!`);
     console.log(`\n   Open on any device in same Wi-Fi:\n`);
     console.log(`   👉  http://${ip}:${PORT}\n`);
