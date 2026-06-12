@@ -45,7 +45,7 @@ lan-transfer [download-path] [port]
 
 | OS | Default |
 |---|---|
-| Android (Termux) | `/storage/emulated/0/` |
+| Android (Termux) | `/storage/emulated/0/Download` |
 | Windows | `C:\Users\username\Downloads` |
 | Linux / macOS | `~/Downloads` |
 
@@ -53,7 +53,7 @@ lan-transfer [download-path] [port]
 
 ```bash
 # Android — serve internal storage
-lan-transfer /storage/emulated/0/
+lan-transfer /storage/emulated/0/DCIM
 
 # Android — serve Downloads folder on custom port
 lan-transfer /storage/emulated/0/Download 8080
@@ -62,7 +62,7 @@ lan-transfer /storage/emulated/0/Download 8080
 lan-transfer C:\Users\YourName\Downloads
 
 # Linux
-lan-transfer ~/Videos
+lan-transfer ~/Desktop
 ```
 
 ---
@@ -94,7 +94,7 @@ lan-transfer ~/Videos
 ## Running on Android (Termux)
 
 ```bash
-pkg install nodejs
+pkg install -y nodejs
 npm i -g @umdv/lan-transfer
 termux-setup-storage
 lan-transfer
