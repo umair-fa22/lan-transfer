@@ -320,7 +320,7 @@ input.addEventListener("change", renderFiles);
 
 function renderFiles() {
   const list = document.getElementById("fileList");
-  const summary = document.getElementById("summary");
+  const summary = document.getElementById("summary-up");
   list.innerHTML = "";
   fileItems = [];
   let totalSize = 0;
