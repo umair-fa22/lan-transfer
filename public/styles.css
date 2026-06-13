@@ -1,7 +1,11 @@
 /* ── Base ──────────────────────────────────────────────────────── */
 body {
   min-height: 100vh;
-  background: #f8f9fa;
+  /* background: linear-gradient(to right, #00411f 20%, white 80%); */
+  /* filter: blur(0.5px); */
+  background: #edeeed;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #212529;
 }
 
 .container-box {
@@ -15,6 +19,14 @@ body {
   max-width: 480px;
   width: 100%;
   margin: 16px;
+}
+
+.card-body {
+  height: 100%;
+  /* display: flex; */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 body.home {
@@ -156,6 +168,11 @@ body.home {
 .breadcrumb-custom span:first-child { color: black; font-weight: bold; cursor: pointer; }
 .breadcrumb-custom span:last-child  { color: #495057; text-decoration: none; cursor: default; }
 .breadcrumb-custom .sep            { color: #adb5bd; }
+
+
+.bread-crumb-item:hover {
+  text-decoration: underline;
+}
 
 /* ── Responsive ────────────────────────────────────────────────── */
 @media (max-width: 576px) {

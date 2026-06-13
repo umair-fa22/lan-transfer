@@ -91,6 +91,7 @@ function renderBreadcrumb() {
     bc.appendChild(sep);
 
     const el = document.createElement("span");
+    el.className = "bread-crumb-item";
     el.textContent = part;
     const rel = arr.slice(0, i + 1).join("/");
     el.onclick = () => navigateTo(rel);
@@ -255,12 +256,22 @@ async function applyPath() {
   }
 }
 
+function versionInfo() {
+  fetch("/version")
+    .then((r) => r.json())
+    .then((data) => {
+      document.getElementById("versioninfo").textContent = `Version: ${data.version}`;
+    });
+}
+
 // ── QR code ───────────────────────────────────────────────────────
 const qrImg = document.getElementById("qrImg");
 if (qrImg) {
   fetch("/qr")
     .then((r) => r.json())
     .then((data) => { qrImg.src = data.qr; });
+
+    versionInfo()
 }
 
 // ── Upload ────────────────────────────────────────────────────────

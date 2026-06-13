@@ -89,6 +89,11 @@ app.get("/config", (req, res) => {
     res.json({ downloadDir, uploadDir });
 });
 
+app.get("/version", (req, res) => {
+    const pkg = require("./package.json");
+    res.json({ version: pkg.version });
+});
+
 app.post("/config/download", (req, res) => {
     const { newPath } = req.body;
 
@@ -171,10 +176,9 @@ app.get("/browse", (req, res) => {
 
 // ── API: download file ────────────────────────────────────────────
 app.get("/download/:filename", (req, res) => {
-    // support sub-paths via query param for folder browsing
-    const subdir = req.query.dir ? path.normalize(req.query.dir) : "";
+    const subdir   = req.query.dir ? path.normalize(req.query.dir) : "";
     const filename = path.basename(req.params.filename);
-    const absBase = path.resolve(downloadDir);
+    const absBase  = path.resolve(downloadDir);
     const filePath = path.resolve(path.join(absBase, subdir, filename));
 
     // security check
@@ -186,7 +190,10 @@ app.get("/download/:filename", (req, res) => {
         return res.status(404).send("File not found");
     }
 
-    res.download(filePath, filename);
+    // force download — works for all files including no-extension and dotfiles
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Content-Type", "application/octet-stream");
+    fs.createReadStream(filePath).pipe(res);
 });
 
 // ── API: upload files ─────────────────────────────────────────────

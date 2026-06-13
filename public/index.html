@@ -16,11 +16,6 @@
     <p class="text-muted mb-0">What do you want to do?</p>
   </div>
 
-  <div id="qrSection" class="text-center mb-4">
-    <img id="qrImg" width="160" height="160" alt="QR Code">
-    <p class="text-muted mt-1" style="font-size:.8rem">Scan to open on another device</p>
-  </div>
-
   <div class="d-flex flex-column gap-3">
     <a href="/upload-page" class="option-btn upload">
       <div class="icon-circle">📤</div>
@@ -34,7 +29,13 @@
     </a>
   </div>
 
-  <p class="text-center text-muted mt-4 mb-0" style="font-size:.8rem;">Connected on local network</p>
+  <div id="qrSection" class="text-center mt-4">
+    <img id="qrImg" width="200" height="200" alt="QR Code">
+    <p class="mt-1 fw-bold" ">Scan to open on another device</p>
+  </div>
+
+  <p class="text-center fw-bold">Connected on local network</p>
+  <p id="versioninfo" class="text-center fw-bold font-monospace"></p>
 
 </div>
 
