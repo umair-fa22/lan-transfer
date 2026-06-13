@@ -1,54 +1,27 @@
+// ── Shared state ─────────────────────────────────────────────────
 let allEntries = [];
-let currentRel = ""; // relative path inside downloadDir
-let downloadDir = ""; // server-side absolute base
+let currentRel = "";
+let downloadDir = "";
 
+// ── File utilities ────────────────────────────────────────────────
 function getFileIcon(name) {
   const ext = name.split(".").pop().toLowerCase();
   const m = {
-    pdf: "📄",
-    doc: "📝",
-    docx: "📝",
-    xls: "📊",
-    xlsx: "📊",
-    ppt: "📊",
-    pptx: "📊",
-    zip: "🗜️",
-    rar: "🗜️",
-    "7z": "🗜️",
-    tar: "🗜️",
-    gz: "🗜️",
-    mp4: "🎬",
-    mkv: "🎬",
-    avi: "🎬",
-    mov: "🎬",
-    mp3: "🎵",
-    wav: "🎵",
-    flac: "🎵",
-    jpg: "🖼️",
-    jpeg: "🖼️",
-    png: "🖼️",
-    gif: "🖼️",
-    webp: "🖼️",
-    js: "💻",
-    ts: "💻",
-    py: "💻",
-    html: "💻",
-    css: "💻",
-    json: "💻",
-    txt: "📃",
-    md: "📃",
-    sh: "💻",
-    exe: "⚙️",
-    apk: "📱",
-    iso: "💿",
+    pdf:"📄", doc:"📝", docx:"📝", xls:"📊", xlsx:"📊", ppt:"📊", pptx:"📊",
+    zip:"🗜️", rar:"🗜️", "7z":"🗜️", tar:"🗜️", gz:"🗜️",
+    mp4:"🎬", mkv:"🎬", avi:"🎬", mov:"🎬",
+    mp3:"🎵", wav:"🎵", flac:"🎵",
+    jpg:"🖼️", jpeg:"🖼️", png:"🖼️", gif:"🖼️", webp:"🖼️",
+    js:"💻", ts:"💻", py:"💻", html:"💻", css:"💻", json:"💻",
+    txt:"📃", md:"📃", sh:"💻", exe:"⚙️", apk:"📱", iso:"💿",
   };
   return m[ext] || "📄";
 }
 
 function formatSize(b) {
   if (!b && b !== 0) return "";
-  if (b < 1024) return b + " B";
-  if (b < 1024 * 1024) return (b / 1024).toFixed(1) + " KB";
+  if (b < 1024)             return b + " B";
+  if (b < 1024 * 1024)      return (b / 1024).toFixed(1) + " KB";
   if (b < 1024 * 1024 * 1024) return (b / 1024 / 1024).toFixed(2) + " MB";
   return (b / 1024 / 1024 / 1024).toFixed(2) + " GB";
 }
@@ -56,14 +29,10 @@ function formatSize(b) {
 function formatDate(iso) {
   if (!iso) return "";
   const d = new Date(iso);
-  return (
-    d.toLocaleDateString() +
-    " " +
-    d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-  );
+  return d.toLocaleDateString() + " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-// ── Back button ──────────────────────────────────────────────────
+// ── Navigation ────────────────────────────────────────────────────
 function goBack() {
   if (!currentRel) return;
   const parts = currentRel.split("/").filter(Boolean);
@@ -71,14 +40,42 @@ function goBack() {
   navigateTo(parts.join("/"));
 }
 
+function navigateTo(relPath) {
+  currentRel = relPath;
+  history.pushState({ rel: relPath }, "");
+  const search = document.getElementById("search");
+  if (search) search.value = "";
+  loadFiles();
+}
+
+window.addEventListener("popstate", (e) => {
+  currentRel = e.state?.rel ?? "";
+  const search = document.getElementById("search");
+  if (search) search.value = "";
+  loadFiles();
+});
+
+// ── Keyboard shortcuts ────────────────────────────────────────────
+document.addEventListener("keydown", (e) => {
+  const inInput = ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName);
+  if (!inInput && e.key === "Backspace") {
+    e.preventDefault();
+    goBack();
+  }
+  if (e.altKey && e.key === "ArrowLeft") {
+    e.preventDefault();
+    goBack();
+  }
+});
+
 // ── Breadcrumb ────────────────────────────────────────────────────
 function renderBreadcrumb() {
-  const bc = document.getElementById("breadcrumb");
+  const bc  = document.getElementById("breadcrumb");
   const btn = document.getElementById("backBtn");
-  bc.innerHTML = "";
+  if (!bc) return;
 
-  // show/hide back button
-  btn.classList.toggle("d-none", !currentRel);
+  bc.innerHTML = "";
+  if (btn) btn.classList.toggle("d-none", !currentRel);
 
   const root = document.createElement("span");
   root.textContent = "🏠 HOME";
@@ -87,8 +84,7 @@ function renderBreadcrumb() {
 
   if (!currentRel) return;
 
-  const parts = currentRel.split("/").filter(Boolean);
-  parts.forEach((part, i) => {
+  currentRel.split("/").filter(Boolean).forEach((part, i, arr) => {
     const sep = document.createElement("span");
     sep.className = "sep";
     sep.textContent = " / ";
@@ -96,60 +92,38 @@ function renderBreadcrumb() {
 
     const el = document.createElement("span");
     el.textContent = part;
-    const rel = parts.slice(0, i + 1).join("/");
+    const rel = arr.slice(0, i + 1).join("/");
     el.onclick = () => navigateTo(rel);
     bc.appendChild(el);
   });
 }
 
-// ── Navigate into a sub-folder ────────────────────────────────────
-function navigateTo(relPath) {
-  currentRel = relPath;
-  document.getElementById("search").value = "";
-  // ── Keyboard shortcuts ───────────────────────────────────────────
-  document.addEventListener("keydown", (e) => {
-    // Backspace (not in input) or Alt+Left → go back
-    const inInput = ["INPUT", "TEXTAREA"].includes(
-      document.activeElement.tagName,
-    );
-    if (!inInput && e.key === "Backspace") {
-      e.preventDefault();
-      goBack();
-    }
-    if (e.altKey && e.key === "ArrowLeft") {
-      e.preventDefault();
-      goBack();
-    }
-  });
-
-  loadFiles();
-}
-
-// ── Load files & folders from server ─────────────────────────────
+// ── Load files & folders ──────────────────────────────────────────
 async function loadFiles() {
   const summary = document.getElementById("summary");
+  if (!summary) return;
+
   summary.innerText = "Loading...";
   summary.className = "badge bg-secondary";
 
-  // fetch config to get current downloadDir
   try {
     const cfg = await fetch("/config").then((r) => r.json());
     downloadDir = cfg.downloadDir;
-    document.getElementById("currentPathDisplay").textContent = downloadDir;
-  } catch (_) { }
+    const display = document.getElementById("currentPathDisplay");
+    if (display) display.textContent = downloadDir;
+  } catch (_) {}
 
   renderBreadcrumb();
 
   try {
-    const url = "/browse?path=" + encodeURIComponent(currentRel);
-    const res = await fetch(url);
+    const res  = await fetch("/browse?path=" + encodeURIComponent(currentRel));
 
     if (!res.ok) {
       const err = await res.json();
       summary.innerText = "Error";
       summary.className = "badge bg-danger";
-      document.getElementById("fileList").innerHTML = `
-        <li class="list-group-item text-danger">${err.error}</li>`;
+      document.getElementById("fileList").innerHTML =
+        `<li class="list-group-item text-danger">${err.error}</li>`;
       return;
     }
 
@@ -157,12 +131,12 @@ async function loadFiles() {
     allEntries = data.entries;
 
     const fileCount = allEntries.filter((e) => !e.isDir).length;
-    const dirCount = allEntries.filter((e) => e.isDir).length;
+    const dirCount  = allEntries.filter((e) =>  e.isDir).length;
     summary.innerText = `${fileCount} file(s), ${dirCount} folder(s)`;
     summary.className = "badge bg-success";
 
     renderEntries(allEntries);
-  } catch (err) {
+  } catch (_) {
     summary.innerText = "Error";
     summary.className = "badge bg-danger";
   }
@@ -174,9 +148,8 @@ function filterEntries() {
 }
 
 function renderEntries(entries) {
-  const list = document.getElementById("fileList");
+  const list  = document.getElementById("fileList");
   const empty = document.getElementById("emptyState");
-
   list.innerHTML = "";
 
   if (entries.length === 0) {
@@ -201,10 +174,8 @@ function renderEntries(entries) {
           <span class="text-muted" style="font-size:.8rem"><strong>&gt;</strong></span>
         </div>`;
     } else {
-      const ext = entry.name.split(".").pop().toLowerCase();
-      const dirParam = currentRel
-        ? `?dir=${encodeURIComponent(currentRel)}`
-        : "";
+      const ext      = entry.name.split(".").pop().toLowerCase();
+      const dirParam = currentRel ? `?dir=${encodeURIComponent(currentRel)}` : "";
       li.innerHTML = `
         <div class="d-flex justify-content-between align-items-center gap-2">
           <div class="flex-grow-1 overflow-hidden fw-semibold">
@@ -213,7 +184,7 @@ function renderEntries(entries) {
               ${entry.name}
               <span class="ext-badge ms-1">${ext}</span>
             </div>
-            <div class="text-muted mt-1" style="font-size:.75rem">
+            <div class="text-muted mt-1 fw-normal" style="font-size:.75rem">
               ${formatSize(entry.size)}${entry.mtime ? " · " + formatDate(entry.mtime) : ""}
             </div>
           </div>
@@ -231,12 +202,10 @@ function renderEntries(entries) {
 
 // ── Settings panel ────────────────────────────────────────────────
 function toggleSettings() {
-  const p = document.getElementById("settingsPanel");
-  p.classList.toggle("d-none");
+  document.getElementById("settingsPanel").classList.toggle("d-none");
 }
 
 function setQuick(p) {
-  // /gethome
   if (p === "HOME") {
     fetch("/gethome")
       .then((r) => r.json())
@@ -247,25 +216,21 @@ function setQuick(p) {
           alert("Failed to get home directory");
         }
       })
-      .catch(() => {
-        alert("Network error");
-      });
+      .catch(() => alert("Network error"));
     return;
   }
-
   document.getElementById("newPathInput").value = p;
 }
 
 async function applyPath() {
   const newPath = document.getElementById("newPathInput").value.trim();
-  const status = document.getElementById("applyStatus");
-
+  const status  = document.getElementById("applyStatus");
   if (!newPath) return;
 
   status.innerHTML = `<span class="text-muted" style="font-size:.8rem">Applying...</span>`;
 
   try {
-    const res = await fetch("/config/download", {
+    const res  = await fetch("/config/download", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ newPath }),
@@ -285,42 +250,43 @@ async function applyPath() {
     } else {
       status.innerHTML = `<span class="text-danger" style="font-size:.8rem">❌ ${data.error}</span>`;
     }
-  } catch (err) {
+  } catch (_) {
     status.innerHTML = `<span class="text-danger" style="font-size:.8rem">❌ Network error</span>`;
   }
 }
 
-loadFiles();
+// ── QR code ───────────────────────────────────────────────────────
+const qrImg = document.getElementById("qrImg");
+if (qrImg) {
+  fetch("/qr")
+    .then((r) => r.json())
+    .then((data) => { qrImg.src = data.qr; });
+}
 
-fetch("/qr")
-  .then((r) => r.json())
-  .then((data) => {
-    document.getElementById("qrImg").src = data.qr;
-  });
-
-const input = document.getElementById("files");
+// ── Upload ────────────────────────────────────────────────────────
+const input    = document.getElementById("files");
 const dropzone = document.getElementById("dropzone");
-let fileItems = [];
+let fileItems  = [];
 
-dropzone.addEventListener("click", () => input.click());
-dropzone.addEventListener("dragover", (e) => {
-  e.preventDefault();
-  dropzone.classList.add("dragover");
-});
-dropzone.addEventListener("dragleave", () =>
-  dropzone.classList.remove("dragover"),
-);
-dropzone.addEventListener("drop", (e) => {
-  e.preventDefault();
-  dropzone.classList.remove("dragover");
-  input.files = e.dataTransfer.files;
-  renderFiles();
-});
-input.addEventListener("change", renderFiles);
+if (dropzone) {
+  dropzone.addEventListener("click", () => input.click());
+  dropzone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropzone.classList.add("dragover");
+  });
+  dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+  dropzone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropzone.classList.remove("dragover");
+    input.files = e.dataTransfer.files;
+    renderFiles();
+  });
+  input.addEventListener("change", renderFiles);
+}
 
 function renderFiles() {
-  const list = document.getElementById("fileList");
-  const summary = document.getElementById("summary-up");
+  const list    = document.getElementById("fileList");
+  const summary = document.getElementById("summary");
   list.innerHTML = "";
   fileItems = [];
   let totalSize = 0;
@@ -330,23 +296,22 @@ function renderFiles() {
     const li = document.createElement("li");
     li.className = "list-group-item";
     li.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="filename">📄 ${file.name}</div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary">${(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                    <span class="file-status text-muted" id="status-${i}">Pending</span>
-                </div>
-            </div>
-            <div class="progress">
-                <div class="progress-bar" id="bar-${i}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-            </div>
-        `;
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="filename">📄 ${file.name}</div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-primary">${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+          <span class="file-status text-muted" id="status-${i}">Pending</span>
+        </div>
+      </div>
+      <div class="progress">
+        <div class="progress-bar" id="bar-${i}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>`;
     list.appendChild(li);
     fileItems.push({ file, bar: null, statusEl: null });
   });
 
   [...input.files].forEach((_, i) => {
-    fileItems[i].bar = document.getElementById(`bar-${i}`);
+    fileItems[i].bar      = document.getElementById(`bar-${i}`);
     fileItems[i].statusEl = document.getElementById(`status-${i}`);
   });
 
@@ -355,13 +320,10 @@ function renderFiles() {
 
 function uploadSingleFile(file, bar, statusEl) {
   return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
+    const xhr      = new XMLHttpRequest();
     const formData = new FormData();
     formData.append("files", file);
-    formData.append(
-      `mtime_${file.name}`,
-      new Date(file.lastModified).toISOString(),
-    );
+    formData.append(`mtime_${file.name}`, new Date(file.lastModified).toISOString());
 
     xhr.upload.addEventListener("progress", (e) => {
       if (e.lengthComputable) {
@@ -406,32 +368,37 @@ async function uploadFiles() {
     return;
   }
 
-  const btn = document.getElementById("uploadBtn");
-  btn.disabled = true;
-  btn.textContent = "Uploading...";
-
+  const btn          = document.getElementById("uploadBtn");
   const globalStatus = document.getElementById("status");
+  btn.disabled       = true;
+  btn.textContent    = "Uploading...";
   globalStatus.innerHTML = `<div class="alert alert-info">Uploading ${input.files.length} file(s)...</div>`;
 
-  let done = 0,
-    failed = 0;
+  let done = 0, failed = 0;
 
   for (let i = 0; i < fileItems.length; i++) {
     const { file, bar, statusEl } = fileItems[i];
     try {
       await uploadSingleFile(file, bar, statusEl);
       done++;
-    } catch (err) {
+    } catch (_) {
       failed++;
     }
   }
 
-  btn.disabled = false;
+  btn.disabled    = false;
   btn.textContent = "Upload Files";
 
-  if (failed === 0) {
-    globalStatus.innerHTML = `<div class="alert alert-success">✅ All ${done} file(s) uploaded successfully!</div>`;
-  } else {
-    globalStatus.innerHTML = `<div class="alert alert-warning">⚠️ ${done} uploaded, ${failed} failed.</div>`;
-  }
+  globalStatus.innerHTML = failed === 0
+    ? `<div class="alert alert-success">✅ All ${done} file(s) uploaded successfully!</div>`
+    : `<div class="alert alert-warning">⚠️ ${done} uploaded, ${failed} failed.</div>`;
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+// push initial state so popstate works on first back press
+history.replaceState({ rel: "" }, "");
+
+// only run on download page
+if (document.getElementById("fileList") && document.getElementById("breadcrumb")) {
+  loadFiles();
 }

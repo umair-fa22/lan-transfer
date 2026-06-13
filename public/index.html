@@ -1,50 +1,43 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>LAN Transfer</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
-    
-    <script src="app.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAN Transfer</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
+<body class="home">
 
-<body>
-    <div class="home-card">
-        <div class="text-center mb-4">
-            <h2 class="fw-semibold">📡 LAN Transfer</h2>
-            <p class="text-muted mb-0">What do you want to do?</p>
-        </div>
+<div class="home-card">
 
-        <div class="d-flex flex-column gap-3">
-            <a href="/upload-page" class="option-btn upload">
-                <div class="icon-circle">📤</div>
-                <h5 class="text-center mb-1">Upload Files</h5>
-                <p class="text-muted text-center mb-0" style="font-size: 0.9rem">
-                    Send files from this device to the server
-                </p>
-            </a>
+  <div class="text-center mb-4">
+    <h2 class="fw-semibold">📡 LAN Transfer</h2>
+    <p class="text-muted mb-0">What do you want to do?</p>
+  </div>
 
-            <a href="/download-page" class="option-btn download">
-                <div class="icon-circle">📥</div>
-                <h5 class="text-center mb-1">Download Files</h5>
-                <p class="text-muted text-center mb-0" style="font-size: 0.9rem">
-                    Browse and download files from the server
-                </p>
-            </a>
-        </div>
+  <div id="qrSection" class="text-center mb-4">
+    <img id="qrImg" width="160" height="160" alt="QR Code">
+    <p class="text-muted mt-1" style="font-size:.8rem">Scan to open on another device</p>
+  </div>
 
-        <div class="text-center my-4">
-            <img id="qrImg" src="" alt="QR Code" style="width: 150px; height: 150px" />
-            <p class="text-muted">Scan the QR code to connect</p>
-        </div>
+  <div class="d-flex flex-column gap-3">
+    <a href="/upload-page" class="option-btn upload">
+      <div class="icon-circle">📤</div>
+      <h5 class="text-center mb-1">Upload Files</h5>
+      <p class="text-muted text-center mb-0" style="font-size:.9rem;">Send files from this device to the server</p>
+    </a>
+    <a href="/download-page" class="option-btn download">
+      <div class="icon-circle">📥</div>
+      <h5 class="text-center mb-1">Download Files</h5>
+      <p class="text-muted text-center mb-0" style="font-size:.9rem;">Browse and download files from the server</p>
+    </a>
+  </div>
 
-        <p class="text-center text-muted mt-4 mb-0" style="font-size: 0.8rem">
-            Connected on local network
-        </p>
-    </div>
+  <p class="text-center text-muted mt-4 mb-0" style="font-size:.8rem;">Connected on local network</p>
+
+</div>
+
+<script src="app.js"></script>
 </body>
-
 </html>
