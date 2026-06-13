@@ -69,17 +69,18 @@ function buildStorage() {
 let upload = multer({ storage: buildStorage() });
 
 // ── Static files ─────────────────────────────────────────────────
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
 
-// ── Page routes ──────────────────────────────────────────────────
+// ── Page routes ─────────────────────────────────────────────────-
+
 app.get("/", (req, res) =>
-    res.sendFile(path.join(__dirname, "public", "index.html")),
+    res.sendFile(path.join(__dirname, "public", "index.html"))
 );
 app.get("/upload-page", (req, res) =>
-    res.sendFile(path.join(__dirname, "public", "upload.html")),
+    res.sendFile(path.join(__dirname, "public", "upload.html"))
 );
 app.get("/download-page", (req, res) =>
-    res.sendFile(path.join(__dirname, "public", "download.html")),
+    res.sendFile(path.join(__dirname, "public", "download.html"))
 );
 
 // ── Config API ───────────────────────────────────────────────────
