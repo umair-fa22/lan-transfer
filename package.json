@@ -1,6 +1,6 @@
 {
   "name": "@umdv/lan-transfer",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Simple LAN file transfer tool for Android, Linux and Windows",
   "main": "server.js",
   "bin": {
