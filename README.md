@@ -33,19 +33,19 @@ Then open the URL shown in the terminal on any device connected to the same Wi-F
 ## Options
 
 ```bash
-lan-transfer [download-path] [port]
+lan-transfer [download-path]
 ```
 
 | Argument        | Description                        | Default              |
 | --------------- | ---------------------------------- | -------------------- |
 | `download-path` | Directory to serve for downloading | OS-based (see below) |
-| `port`          | Port to run the server on          | `3000`               |
 
 **Default download paths by OS:**
 
 | OS               | Default                        |
 | ---------------- | ------------------------------ |
-| Android (Termux) | `/storage/emulated/0/Download` |
+| Android (Internal) | `/storage/emulated/0/Download` |
+| Android (Termux) | `/data/data/com.termux/files/home` |
 | Windows          | `C:\Users\username\Downloads`  |
 | Linux / macOS    | `~/Downloads`                  |
 
@@ -53,10 +53,10 @@ lan-transfer [download-path] [port]
 
 ```bash
 # Android — serve internal storage
-lan-transfer /storage/emulated/0/DCIM
+lan-transfer /storage/emulated/0/
 
-# Android — serve Downloads folder on custom port
-lan-transfer /storage/emulated/0/Download 8080
+# Android — serve Downloads folder
+lan-transfer /storage/emulated/0/Download
 
 # Windows
 lan-transfer C:\Users\YourName\Downloads

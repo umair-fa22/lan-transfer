@@ -42,7 +42,7 @@ const PORT = 3000;
 
 const QRCode = require("qrcode");
 const qrcode = require("qrcode-terminal");
-const uploadDir = path.join(process.cwd(), "uploads");
+const uploadDir = path.join(process.cwd(), "uploads"); // always use "uploads" in current working dir for uploads
 
 app.use(express.json());
 
